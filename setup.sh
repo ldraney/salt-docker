@@ -122,6 +122,31 @@ diagnose_salt_connection() {
     nc -zv localhost 4505
     nc -zv localhost 4506
 }
+cleanup() {
+    echo "Cleaning up Docker containers, networks, and volumes..."
+    docker stop $(docker ps -aq) 2>/dev/null || true
+    docker rm $(docker ps -aq) 2>/dev/null || true
+    docker network prune -f
+    docker volume prune -f
+}
+
+adjust_permissions() {
+    local user=$(whoami)
+    local opt_dir="/opt"
+    local exclude_dirs=("$@")
+    local exclude_args=""
+
+    # Build exclude arguments for find command
+    for dir in "${exclude_dirs[@]}"; do
+        exclude_args="$exclude_args -not -path '$opt_dir/$dir*'"
+    done
+
+    # Change ownership of files and directories in /opt
+    # shellcheck disable=SC2086
+    sudo find "$opt_dir" $exclude_args -exec chown "$user:$user" {} +
+
+    echo "Permissions adjusted for $user in $opt_dir (excluding ${exclude_dirs[*]:-none})"
+}
 
 # Main execution
 case "$1" in
@@ -148,6 +173,10 @@ case "$1" in
         ;;
     diagnose)
         diagnose_salt_connection
+        ;;
+    permissions)
+        shift
+        adjust_permissions "$@"
         ;;
     all)
         setup_docker
