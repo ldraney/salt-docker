@@ -52,17 +52,33 @@ accept_minion_key() {
 # Modify the setup_salt_minion function to include key acceptance
 setup_salt_minion() {
     echo "Setting up Salt Minion..."
-    curl -L https://bootstrap.saltstack.com -o install_salt.sh
-    sudo sh install_salt.sh -P
+
+    # Stop the salt-minion service if it's running
+    sudo systemctl stop salt-minion || true
+
+    # Remove existing Salt installation and configuration
+    sudo apt-get remove -y salt-minion || true
+    sudo apt-get purge -y salt-minion || true
+    sudo apt-get autoremove -y
+    sudo rm -rf /etc/salt /var/cache/salt /var/log/salt /var/run/salt || true
+
+    # Update package lists
+    sudo apt-get update
+
+    # Install Salt minion
+    sudo apt-get install -y salt-minion
+
     echo "Configuring Salt Minion to connect to localhost..."
     sudo sed -i 's/#master: salt/master: localhost/' /etc/salt/minion
+
     echo "Restarting Salt Minion service..."
     sudo systemctl restart salt-minion
+
     echo "Waiting for Salt Minion to start..."
     sleep 10
     sudo systemctl status salt-minion
     
-    # Add this line to accept the key
+    # Accept the minion key
     accept_minion_key
 }
 
@@ -177,6 +193,9 @@ case "$1" in
     permissions)
         shift
         adjust_permissions "$@"
+        ;;
+    clean)
+        cleanup
         ;;
     all)
         setup_docker
