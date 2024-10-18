@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Run the update script
-docker compose run --rm updater
-
 # Set build arguments
 export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 export VCS_REF=$(cat docker-salt-master/VERSION)

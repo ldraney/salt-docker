@@ -4,7 +4,13 @@
 
 Salt-Docker is a robust, flexible system for managing multiple Docker-based projects on a single host using SaltStack. It provides an idempotent setup process, automated project discovery, and centralized configuration management.
 
-## Key Features
+This repo uses the [docker-salt-master project](https://github.com/cdalvaro/docker-salt-master) as a tool and guide. 
+To update the cloned version in this repo, please run:
+```
+docker compose run --rm updater
+```
+
+## Key Featuresid
 
 - Automated Docker installation and configuration
 - Salt master running in a Docker container
