@@ -1,0 +1,14 @@
+# Dockerfile.updater
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY update_salt_master.sh .
+RUN chmod +x update_salt_master.sh
+
+ENTRYPOINT ["./update_salt_master.sh"]
